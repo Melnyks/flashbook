@@ -1,0 +1,185 @@
+{% extends 'base.html' %}
+
+{% block search_url %}
+{% endblock %}
+
+{% block add_new_link_1 %}
+{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="card shadow p-4 mb-5 bg-white rounded" style="margin-left: 10px; margin-right: 10px;">
+        <div class="row">
+            <!-- Left Section: Profile Picture Display -->
+            <div class="col-md-3 d-flex flex-column align-items-center mb-3 position-relative">
+                <!-- ใช้ label ครอบรูปภาพแทนการใช้ปุ่มเลือกไฟล์ -->
+                <label for="profile_picture" class="profile-label">
+                    {% if user.profile_picture %}
+                        <img src="{{ user.profile_picture.url }}" alt="Profile Picture" class="profile-img mb-3" id="profile-img-preview"/>
+                    {% else %}
+                        <img src="https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png" alt="Default Profile Picture" class="profile-img mb-3" id="profile-img-preview"/>
+                    {% endif %}
+                    <div class="edit-overlay">
+                        <span>Edit</span>
+                    </div>
+                </label>
+
+                <h3 class="text-center">{{user.user}}</h3>
+            </div>
+
+            <!-- Right Section: Profile Form -->
+            <div class="col-md-9">
+                <h2 class="text-purple">Profile Information</h2>
+                <form method="post" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label for="user" class="form-label">Username</label>
+                        <input type="text" class="form-control" id="user" name="user" value="{{ user.user }}" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="fname" class="form-label">First Name</label>
+                        <input type="text" class="form-control" id="fname" name="fname" value="{{ user.fname }}" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="lname" class="form-label">Last Name</label>
+                        <input type="text" class="form-control" id="lname" name="lname" value="{{ user.lname }}" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="email" class="form-label">Email</label>
+                        <input type="email" class="form-control" id="email" name="email" value="{{ user.email }}" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="title" class="form-label">Title</label>
+                        <select class="form-control" id="title" name="title">
+                            <option value="" {% if not user.title %}selected{% endif %}>None</option>
+                            {% for title_option in user.title_ava %}
+                                <option value="{{ title_option }}" {% if user.title == title_option %}selected{% endif %}>
+                                    {{ title_option }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="card_color" class="form-label">Card Color</label>
+                        <select class="form-control" id="card_color" name="card_color">
+                            <option value="#fff" {% if not user.card_color %}selected{% endif %} style="background-color: #fff;">#fff</option>
+                            {% for color_option in user.card_color_ava %}
+                                <option value="{{ color_option }}" {% if user.card_color == color_option %}selected{% endif %} style="background: {{ color_option }};">
+                                    {{ color_option }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="current_password" class="form-label">Current Password</label>
+                        <input type="password" class="form-control" id="current_password" name="current_password">
+                    </div>
+                    <div class="mb-3">
+                        <label for="new_password" class="form-label">New Password</label>
+                        <input type="password" class="form-control" id="new_password" name="new_password">
+                    </div> 
+
+                    <!-- Input file ซ่อนไว้ -->
+                    <input type="file" id="profile_picture" name="profile_picture" style="display: none;">
+
+                    <button type="submit" class="btn btn-primary">Save Changes</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // ฟังก์ชันแสดงตัวอย่างรูปที่เลือก
+    document.getElementById('profile_picture').addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const imgElement = document.getElementById('profile-img-preview');
+                imgElement.src = e.target.result;
+            }
+            reader.readAsDataURL(file);
+        }
+    });
+
+    function togglePasswordVisibility() {
+        const passwordInput = document.getElementById('password');
+        const toggleButton = event.target;
+
+        if (passwordInput.type === 'password') {
+            passwordInput.type = 'text';
+            toggleButton.textContent = 'Hide';
+        } else {
+            passwordInput.type = 'password';
+            toggleButton.textContent = 'Show';
+        }
+    }
+</script>
+
+<style>
+    .container {
+        margin-top: 120px
+    }
+    .profile-img {
+        width: 180px;
+        height: 180px;
+        border-radius: 50%;
+        object-fit: cover;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+        transition: opacity 0.3s ease;
+    }
+
+    .profile-label {
+        position: relative;
+        cursor: pointer;
+        display: inline-block;
+    }
+
+    .profile-label:hover .edit-overlay {
+        opacity: 1;
+    }
+
+    .edit-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 180px;
+        height: 180px;
+        border-radius: 50%;
+        background: rgba(0,0,0,0.4);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+        color: #fff;
+        font-weight: bold;
+    }
+
+    .card {
+        max-width: 850px;
+        margin: auto;
+        margin-left: 0; /* ลดระยะห่างทางซ้ายมือให้ใกล้กับ sidebar */
+    }
+
+    h2.text-purple {
+        color: #754de0;
+    }
+
+    h3 {
+        color: #333;
+        font-weight: bold;
+    }
+
+    .card-color-dropdown option {
+        color: black; /* Default color for text */
+    }
+
+    /* Disable hover effect on options in card color dropdown */
+    .card-color-dropdown option:hover {
+        background: none; /* No change on hover */
+    }
+</style>
+{% endblock %}
